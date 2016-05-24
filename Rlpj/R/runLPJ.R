@@ -1,15 +1,36 @@
-#' @title The function to run the LPJ in parallel
-#' @description This function reads the setup parallel object and creates a
-#'  cluster to which it submits the model wrapper function with its respective
-#'  parameters.
-#' @param mainDir a character string indicating the path to the directory where
+#' @title The title, in this case: Helloworld-ify the argument.
+#'
+#' @description Some additional details about this S4 generic and its methods.
+#' The extra blank line between this section and the title is
+#' critical for roxygen2 to differentiate the title from the
+#' description section.
+#'
+#' @param x  either a object created with the setupLPJParallel function or a
+#'  character string indicating the path to the directory where
 #'  all input data and template are located and in which the function will create
-#'  the directory structure for the outputs
-#' @param gridList a character string providing the name of the text file with
+#'  the directory structure for the outputs.
+#' @param parameterList a named list containing the parameters to be calibrated
+#' @param typeList a character vector with the outputs to be analyzed.
+#' Default value is all outputs.
+#' @param settings addtional parameters \itemize{
+#' \item @param gridList a character string providing the name of the text file with
 #' the grids to be included in the model, e.g gridlist.txt. It must be in the mainDir.
 #' Provide only the file name, not the path.
-#' @param scale a character string indicating whether the model runs global or
+#' \item @param scale a character string indicating whether the model runs global or
 #' for europe.
+#' \item
+#' \item
+#' \item
+#' \item
+#'
+#' }
+
+#' @return a object of class LPJData
+#' @seealso LPJDATA
+#' @export
+#' @docType methods
+#'
+#'
 #' @param mode a character string indicating whether using cru or cf data
 #' @param file.co2 a character string providing the absolute path to the C02 input file
 #' @param file.cru a character string providing the absolute path to the cur? input file
@@ -42,9 +63,6 @@
 #' @param delete a boolean indicating whether output files should be deleted after
 #'  processing (default TRUE).
 #' Saved plots will not be deleted.
-#' @param parallel a boolean indicating whether the function must run in parallel
-#' (default FALSE). If parallel TRUE, the setupObject must be provided.
-#' @param setupObject a names list created with the setupLPJParallel function.
 #' @param ID an integer after which the output directory will be named (default empty).
 #' If parallel TRUE, ID is ignored and defined by setupLPJParallel.
 #' @return a list holding the outputs of the runLPJwrapper (see function help)
@@ -133,7 +151,7 @@
 #' result <- runLPJ(mainDir, gridList, scale = "global",mode = "cf", file.co2,
 #'                  file.cru, file.cru.misc, file.ndep, file.temp, file.prec,
 #'                  file.insol, parameterList = parameterList, parallel = TRUE,
-#'                  setupObject = mySetup)
+#'                  x = mySetup)
 #'
 #'    Output typeList has not been provided
 #'    Setting typeList to default values
@@ -168,131 +186,214 @@
 #'
 #'
 #'  }
-runLPJ <- function(mainDir=NULL, gridList= NULL, scale = NULL, mode = NULL,
-                   file.co2 = NULL, file.cru = NULL, file.cru.misc = NULL,
-                   file.ndep= NULL, file.temp = NULL, file.prec = NULL, file.insol = NULL,
-                   typeList = NULL, parameterList=NULL, template1 = NULL,
-                   template2=NULL,  plot.data = FALSE, save.plots = FALSE,
-                   processing = FALSE, delete = TRUE, parallel = FALSE,
-                   setupObject = NULL, ID = ""){
+
+runLPJ <-  function(x=NULL, typeList=NULL, parameterList=NULL, settings = NULL){
+
+  if (is.null(x)){
+    stop("Please provide a valid value for x")
+
+  }else if (class(x) == "character"){
   #----------------------------------------------------------------------------#
-  # CHECK INPUTS AND EXIT IF ANY ERROR
+  # SERIAL RUNLPJ
   #----------------------------------------------------------------------------#
-  # mainDir
-    if (is.null(mainDir) || !file.exists(mainDir)){
-      stop("Please provide a valid main directory")
+    if (is.null(settings) || !typeof(settings) == "list"){
+        stop("Invalid settings provided")
     }
-    # mode
-    if (is.null(mode) || mode != "cf" & mode != "cru"){
-      stop("Please provide a valid cluster type: cf or cru")
+    if(!file.exists(x)){
+      stop("Invalid main directory")
     }
-    if ( is.null(scale) || scale != "global" & scale != "europe"){ # this is relevant if getting template
-      stop("Please provide a valid scale: global or europe")
-    }
-    if (is.null(typeList)){
-      typeList <-  typelist.default
-      cat("\n\nOutput typeList has not been provided")
-      cat("\nSetting typeList to default values")
-    }
-    # checking template1
-    if (is.null(template1)){
-      # writing out template and storing name
-      template1 <- getTemplate (scale, outputDir = mainDir)
-      cat("\n\nUsing package template (template 1).")
-      cat("\nSaving package template in the mainDir.")
-    }else if (!file.exists(file.path(mainDir, template1))){
-      warning ("The provided template (template1) does not exist")
-      stop("Please provide a valid template name")
-    }
-    # checkign template 2: either cru or cf
-    if ( is.null(template2)){
-      # writing out template and storing name
-      template2 <- getTemplate (type = paste(scale,"_", mode, sep = ""),
-                                outputDir = mainDir)
-      cat("\n\nUsing package template (template 2).")
-      cat("\nSaving package template in the mainDir.")
-    }else if (!file.exists(file.path(mainDir, template2))){
-      warning ("The provided template (template2) does not exist")
-      stop("Please provide a valid template name")
-    }
-    # checking gridlist
-    if ( is.null(gridList) || !file.exists(file.path(mainDir, gridList))){
-      stop ("Please provide a valid grid list.")
-    }
-    # Parallel/single specific check before doing anything else
-    if(parallel){
-      if (is.null(setupObject)){
-        stop("Please provide a setup object")
-      }
-      if (is.null(parameterList)){
-        stop("Please provide a valid parameter list")
-      }
-    }else{
-      if ( is.null(parameterList)){
-        cat ("\n\nYou have not provided a parameter list.")
-        cat ("\nModel will run with default values")
-      }
-    }
-    # Pack up all files that user should have provided
-    # Get the default list from internal data , that contains the characters stings
-    # to replace in the template
-    # Go throught the files and check whether they provided, if so add them to
-    # default list, otherwise stop the function
-    files <- list(file.co2 = file.co2, file.cru = file.cru,
-                  file.cru.misc = file.cru.misc, file.ndep = file.ndep,
-                  file.temp = file.temp, file.prec = file.prec,
-                  file.insol = file.insol)
-    files.default <-   files.parameters[[mode]]
-    files.names <- names(files.default)
-    for (i in 1:length(files.names)){
-      if (is.null(files[[files.names[i]]])){
-        stop(paste("The", files.names[i], "has not been provided", sep = " "))
-      }else if(!file.exists(files[[files.names[i]]])){
-        stop(paste("The", files.names[i], "does not exist", sep = " "))
-      }else{
-        files.default[[files.names[i]]][2] <- files[[files.names[i]]]
-      }
+    if ( is.null(parameterList)){
+      cat ("\n\nYou have not provided a parameter list.")
+      cat ("\nModel will run with default values")
+    }else if(!typeof(parameterList) == "list"){
+      stop("Please provide a valid parameter list")
     }
 
-  #----------------------------------------------------------------------------#
-  # DO WHAT IS COMMON TO SINGLE AND PARALLEL
-  #----------------------------------------------------------------------------#
-  # create a runinfo dir
-  runInfoDir <- file.path(mainDir, paste("runInfo",
-                                         format(Sys.time(), "%Y_%m_%d_%H%M%S"),
-                                         sep = "_"))
-  dir.create(runInfoDir, showWarnings = FALSE)
-  # create the single object
-  singleRun <- list (mainDir = mainDir,  template1 = NULL, template1Name = template1,
-                     template2 = NULL, template2Name = template2, gridList= NULL,
-                     gridListName = gridList, runDir = NULL, outDir = NULL,
-                     mode = mode, scale = scale,  typeList = typeList, parameterList=NULL,
-                     runID = NULL,  runInfoDir = runInfoDir,
-                     processing = processing, delete = delete, plot.data = plot.data,
-                     save.plots = save.plots, files.names = files.default)
-  singleRun$gridList <- readLines(file.path(mainDir,gridList))
-  #----------------------------------------------------------------------------#
-  # PARALLEL
-  #----------------------------------------------------------------------------#
-  if(parallel){
-    # setup object has all needed for pallel structure
-    result <- runLPJParallel(setupObject, singleRun, parameterList)
-  #----------------------------------------------------------------------------#
-  # SINGLE
-  #----------------------------------------------------------------------------#
-  }else{
+    # do the settings check
+    singleRun <- try(createSingleObject(x, typeList, settings), FALSE)
+    if ('try-error' %in% class(singleRun)){
+      stop("Invalid settings provided")
+    }
+
+
+    dir.create(singleRun$runInfoDir, showWarnings = FALSE)
     # Need to create an output folder named after ID
-    runDir <- file.path(mainDir, paste("runDirectory", ID, sep=""))
-    outDir <- file.path(mainDir, paste("runDirectory", ID, sep=""), paste("outDirectory", ID, sep=""))
-    #outDir <- file.path(mainDir, paste("outDirectory", ID, sep=""))
-    dir.create(runDir, showWarnings = FALSE)
-    dir.create(outDir, showWarnings = FALSE)
-    singleRun <- fillSingleObject(singleRun, runDir, outDir, parameterList, ID)
+    singleRun$runDir <- file.path(x, paste("runDirectory", singleRun$runID, sep=""))
+    singleRun$outDir <- file.path(x, paste("runDirectory", singleRun$runID, sep=""),
+                                  paste("outDirectory", singleRun$runID, sep=""))
+    dir.create(singleRun$runDir, showWarnings = FALSE)
+    dir.create(singleRun$outDir, showWarnings = FALSE)
+
+
+    #
+    singleRun$template1Mem <- readLines(file.path(singleRun$mainDir, singleRun$template1))
+    singleRun$template1Mem <- sub("path_to_output/",
+                                  paste(singleRun$outDir, "/", sep =""), singleRun$template1Mem)
+    for ( j in 1:length(singleRun$typeList)) {
+      singleRun$template1Mem <- sub(paste("! file", singleRun$typeList[j], sep="_"),
+                                    paste("file",  singleRun$typeList[j], sep="_") , singleRun$template1Mem)
+    }
+    # template 2: the cru or cf template
+    singleRun$template2Mem <- readLines(file.path(singleRun$mainDir,singleRun$template2))
+    singleRun$template2Mem <- sub("path_to_globalTemplate",
+                                  paste(singleRun$runDir, "/", singleRun$template1, sep=""),
+                                  singleRun$template2Mem )
+    singleRun$template2Mem  <- sub("path_to_gridlist",
+                                   paste(singleRun$runDir,"/", singleRun$gridList, sep=""),
+                                   singleRun$template2Mem )
+    for ( j in 1:length(singleRun$filesNames)){
+      singleRun$template2Mem  <- sub(singleRun$filesNames[[j]][1],
+                                     singleRun$filesNames[[j]][2],
+                                     singleRun$template2Mem)
+    }
     result <- runLPJWrapper(singleRun)
+    return(result)
+
+  #----------------------------------------------------------------------------#
+  # PARALLEL RUNLPJ
+  #----------------------------------------------------------------------------#
+  }else if(class(x) == "LPJSetup"){
+
+  if (is.null(settings) || !typeof(settings) == "list"){
+      stop("Invalid settings provided")
+    }
+  if ( is.null(parameterList) || !typeof(parameterList) == "list"){
+      stop("Please provide a valid parameter list")
+    }
+  # do the settings check
+  singleRun <- try(createSingleObject(x[["mainDir"]], typeList, settings ), FALSE)
+  if ('try-error' %in% class(singleRun)){
+    stop("Invalid settings provided")
+  }
+  # setup object has all needed for pallel structure
+  # Checking packages availability
+  if (!requireNamespace("snow", quietly = TRUE)){
+    stop("Can't load required library 'snow', runLPJparallel will now exit.")
+  }
+  if (x[["clusterType"]]=="MPI"){
+    if (!requireNamespace("Rmpi", quietly = TRUE)){
+      stop("Can't load required library 'Rmpi', runLPJparallel will now exit.")
+    }else{
+      # check cluster size
+      numCores.available <- Rmpi::mpi.universe.size() - 1
+      if ( numCores.available == 0) {
+        stop("There are not enough available cores to create a cluster")
+      }else if ( numCores.available != x[["numCores"]]) {
+        message(paste("There are", numCores.available,"cores available ", sep = " "))
+        message(paste("You requested", x[["numCores"]],  "cores", sep = " "))
+        message("The number of cores will be set to meet the available resources")
+        x@numCores <- numCores.available
+      }
+    }
+  }
+  # Check cores with runs
+  if (length(parameterList) < x[["numCores"]]){
+    stop("The number of cores requested exceeds the number of runs")
+  }
+  # Need to create an output folder named after ID
+  dir.create(singleRun$runInfoDir, showWarnings = FALSE)
+  #----------------------------------------------------------------------------#
+  # READ SETUP AND CREATE THE RUNPARAMETER
+  #----------------------------------------------------------------------------#
+  cat("\n\nReading the parallel object structure")
+  # Creating list that will hold data. It is faster to first create objects,
+  # and then fill them with values, instead of grow then withing a loop.
+  runDir <- vector("character", length(parameterList))
+  outDir <- vector("character", length(parameterList))
+  # the actual list that will hold the information need for all runs
+  runParameters <- rep(list(), length(parameterList))
+  for (i in 1:x[["numCores"]]) {
+    for (index in seq(i, length(parameterList), x[["numCores"]] )){
+      runDir[index] <- x[["runDir"]][i]
+      outDir[index] <- x[["outDir"]][i]
+    }
+  }
+  cat("\nCreating the single run objects")#single run objects
+  progessBar <- txtProgressBar(min = 0, max = length(parameterList), style = 3)
+  for (i in 1:length(parameterList)){
+    setTxtProgressBar(progessBar, i)
+    singleRun$runDir <- runDir[i]
+    singleRun$outDir <- outDir[i]
+    singleRun$parameterList <- parameterList[[i]]
+    #
+    singleRun$template1Mem <- readLines(file.path(singleRun$mainDir, singleRun$template1))
+    singleRun$template1Mem <- sub("path_to_output/",
+                                  paste(singleRun$outDir, "/", sep =""), singleRun$template1Mem)
+    for ( j in 1:length(singleRun$typeList)) {
+      singleRun$template1Mem <- sub(paste("! file", singleRun$typeList[j], sep="_"),
+                                 paste("file",  singleRun$typeList[j], sep="_") , singleRun$template1Me)
+    }
+    # template 2: the cru or cf template
+    singleRun$template2Mem<- readLines(file.path(singleRun$mainDir,singleRun$template2))
+    singleRun$template2Mem <- sub("path_to_globalTemplate",
+                                  paste(singleRun$runDir, "/", singleRun$template1, sep=""),
+                                  singleRun$template2Mem )
+    singleRun$template2Mem  <- sub("path_to_gridlist",
+                                   paste(singleRun$runDir,"/", singleRun$gridList, sep=""),
+                                   singleRun$template2Mem )
+    for ( j in 1:length(singleRun$filesNames)){
+      singleRun$template2Mem  <- sub(singleRun$filesNames[[j]][1],
+                                     singleRun$filesNames[[j]][2],
+                                     singleRun$template2Mem)
+    }
+    runParameters[[i]] <- singleRun
+  }
+  close(progessBar)
+  #----------------------------------------------------------------------------#
+  # SOCK CLUSTER
+  #----------------------------------------------------------------------------#
+  # Initialisation of snowfall.
+  # Create cluster
+  if (x[["clusterType"]] =="SOCK"){
+    cat( paste ("\nCreating a", x[["clusterType"]], "cluster with",
+                x[["numCores"]], " cores", sep = " " ))
+    cl <-  snow::makeSOCKcluster(x[["numCores"]])
+    # Exporting needed data and loading required
+    # packages on workers. --> If daa is loaded firs it can be exporte to all workers
+    snow::clusterEvalQ(cl, library(Rlpj))
+    snow::clusterEvalQ(cl, "runParameters")
+    # Distribute calculation: will return values as a list object
+    cat ("\nSending tasks to the cores\n")
+    result <- snow::clusterMap(cl, runLPJWrapper,  runParameters )
+    #result <- snow::clusterApply(cl, runParameters, runLPJwrapper )
+    # Destroy cluster
+    snow::stopCluster(cl)
+    # deliver data to clusters
+    # Snow's close command, shuts down and quits from script
+    #----------------------------------------------------------------------------#
+    # MPI CLUSTER
+    #----------------------------------------------------------------------------#
+  }else if (x[["clusterType"]] =="MPI"){
+    # Use Rmpi to spawn and close the slaves
+    # Broadcast the data to the slaves and
+    # Using own MPISapply with mpi.parsSapply. mpi.parSapply takes a list
+    # "cores", so that there is one task for each core.
+    # Then each core is aware of how many task he has to carry and applies
+    # MPISapply on its tassk. Result is a list of list, thus, it must be
+    # unlisted
+    # needlog avoids fork call
+    if(is.loaded ("mpi_initialize")){
+      if (Rmpi::mpi.comm.size() < 1 ){
+        cat( paste ("\nCreating a", x[["clusterType"]], "cluster with",
+                    x[["numCores"]], "cores", sep = " " ))
+        cat("\nPlease call exit_mpi at the end of you script")
+        Rmpi::mpi.spawn.Rslaves(nslaves = x[["numCores"]], needlog = FALSE)
+      }else{
+        cat(paste("\nUsing the existing", x[["clusterType"]], "cluster with",
+                  x[["numCores"]], " cores", sep = " " ))
+      }
+    }
+    cores <- rep(x[["numCores"]], x[["numCores"]])
+    Rmpi::mpi.bcast.Robj2slave(cores)
+    Rmpi::mpi.bcast.Robj2slave(runParameters)
+    Rmpi::mpi.bcast.cmd(library(Rlpj))
+    result <- Rmpi::mpi.parSapply(cores, MPISapply, runParameters = runParameters)
   }
   #----------------------------------------------------------------------------#
   # END
   #----------------------------------------------------------------------------#
-  cat("\nProcessing ended!")
-  return(result)
+  return(unlist(result))
+  }
 }
+
+

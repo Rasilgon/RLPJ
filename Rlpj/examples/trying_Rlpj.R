@@ -14,9 +14,12 @@ file.insol <- "/home/trashtos/GitHub/lpjRun/inputLPJ/rad.nc"
 mainDir <- "/home/trashtos/GitHub/lpjRun"
 gridList <- "gridlist_geb.txt"
 
-result <-   runLPJ(mainDir, gridList, scale = "global",mode = "cf", file.co2,
-                   file.cru, file.cru.misc, file.ndep, file.temp, file.prec,
-                   file.insol, delete = F)
+
+settings <- list (gridList = gridList,mode = "cf", scale = "global",
+                  file.co2 = file.co2, file.cru = file.cru, file.cru.misc = file.cru.misc,
+                  file.ndep = file.ndep, file.temp = file.temp, file.prec = file.prec,
+                  file.insol = file.insol, delete = F)
+result <-   runLPJ(mainDir, settings= settings)
 
 
 
@@ -41,10 +44,7 @@ for (i in 1:length(par)) {
 mySetup  <- setupLPJParallel(numCores = 3, clusterType ="SOCK", mainDir = "/home/trashtos/GitHub/lpjRun")
 
 proc1 <- proc.time()
-result <-   runLPJ(mainDir, gridList, scale = "global", mode = "cf", file.co2,
-                   file.cru, file.cru.misc, file.ndep, file.temp, file.prec,
-                   file.insol, parameterList = parameterList,  parallel = TRUE,
-                   processing = TRUE, setupObject = mySetup, delete = TRUE)
+result <-   runLPJ(mySetup,  settings= settings, parameterList = parameterList )
 proc.time() - proc1
 
 

@@ -88,5 +88,13 @@ setupLPJParallel <- function(numCores=NULL, clusterType = NULL, mainDir=NULL)
   #----------------------------------------------------------------------------#
   # END
   #----------------------------------------------------------------------------#
-  return ( list(clusterType = clusterType, numCores= numCores, runDir = runDir, outDir = outDir))
+
+  setupObject <- new(Class="LPJSetup",
+                clusterType = clusterType,
+                numCores= numCores,
+                mainDir = mainDir,
+                runDir = runDir,
+                outDir = outDir)
+
+  return (setupObject)
 }

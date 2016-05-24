@@ -14,7 +14,6 @@
 #' @seealso \url{https://cran.r-project.org/web/packages/zoo/zoo.pdf}
 #' @author Florian Hartig, Ramiro Silveyra Gonzalez, Maurizio Bagnara
 #' @note Based on an older code of Joerg Steinkamp
-#' @export
 #' @examples \dontrun{
 #' LPJout <- getData( typeList = c("aaet",  "cflux","lai", "nflux"),
 #'           "~/path/to/output/files", runInfo = list(parameter1 = 0.5, grid = 1))
