@@ -1,8 +1,8 @@
-#' @title The function to fill the single run object
-#'
-#' @description This function TODO
-#' @param data TODO
-#' @return TODO
+# @title The function to fill the single run object
+#
+# @description This function TODO
+# @param data TODO
+# @return TODO
 convertTS <- function(data = NULL){
   # setting annual true or false
   annual <- TRUE

@@ -1,20 +1,20 @@
-#' @title A wrapper to run the LPJ-GUESS and processed the ouputs
-#'
-#' @description This function modifies the lpj template with the desired parameter
-#'  values and then does a system call for running the lpj modell.
-#'  The modell outputs are processed, plotted (if set to TRUE)
-#' @param runObject a named list created by the runLPJParallel function containing
-#' the following: mainDir, template1, template2, gridList, runDir, outDir, mode,
-#' scale, typeList, runID,  gridFilename, plot.data and save.plots
-#' @return a a data class object with the slots runInfo and dataTypes. The runInfo
-#' slot contains the provided run information and parameters; the dataTypes holds
-#' the processed output data from the run.
-#' @keywords Rlpj
-#' @author Florian Hartig, Ramiro Silveyra Gonzalez, Maurizio Bagnara
-#' @note Based an older code of Istem Fer, Uni Potsdam
-#' @examples \dontrun{
-#' runLPJwrapper(runObject)
-#' }
+# @title A wrapper to run the LPJ-GUESS and processed the ouputs
+#
+# @description This function modifies the lpj template with the desired parameter
+#  values and then does a system call for running the lpj modell.
+#  The modell outputs are processed, plotted (if set to TRUE)
+# @param runObject a named list created by the runLPJParallel function containing
+# the following: mainDir, template1, template2, gridList, runDir, outDir, mode,
+# scale, typeList, runID,  gridFilename, plot.data and save.plots
+# @return a a data class object with the slots runInfo and dataTypes. The runInfo
+# slot contains the provided run information and parameters; the dataTypes holds
+# the processed output data from the run.
+# @keywords Rlpj
+# @author Florian Hartig, Ramiro Silveyra Gonzalez, Maurizio Bagnara
+# @note Based an older code of Istem Fer, Uni Potsdam
+# @examples \dontrun{
+# runLPJwrapper(runObject)
+# }
 runLPJWrapper <- function(runObject){
   #----------------------------------------------------------------------------#
   # CHECK INPUTS AND EXIT IF ANY ERROR
@@ -71,7 +71,9 @@ runLPJWrapper <- function(runObject){
   LPJout <- getData(runObject$typeList, runObject$outDir, runObject,
                      runObject$processing)
 
-
+  #if (is.na(LPJout@dataTypes)){
+  #  stop("There are not model outputs. Please check the guess.log files")
+  #}
   #----------------------------------------------------------------------------#
   # CLEAN UP RUNDIR
   #----------------------------------------------------------------------------#
@@ -91,7 +93,7 @@ runLPJWrapper <- function(runObject){
   save(runObject, file = file.path(runObject$runInfoDir,
                                    paste("runInfo", runObject$runID,".Rdata", sep = "")))
   if (runObject[["plot.data"]] == TRUE){
-    plotLPJData(data = LPJout@dataTypes, typeList = runObject$typeList,
+    plotLPJData(data = LPJout, typeList = runObject$typeList,
              outDir = runObject$outDir, save.plots = runObject$save.plots,
              prefix = paste("run",runObject$runID, "_", sep=""))
   }

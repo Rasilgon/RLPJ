@@ -1,6 +1,8 @@
 #' @title A LPJ-GUESS data class object
-#' @description  This is a data class object to store both the LPJ-GUESS outputs
+#'
+#' @description This is a data class object to store both the LPJ-GUESS outputs
 #' and the information that was passed to LPJ-GUESS.
+#'
 #' @return a data class object with the slots runInfo and dataTypes
 #' @keywords Rlpj
 #' @export
@@ -30,7 +32,7 @@ setMethod(f= "initialize",
 )
 
 
-#Defining slot setters1!
+
 setGeneric("runInfo<-", function(object, value) standardGeneric("runInfo<-"))
 setReplaceMethod(f ="runInfo",
                  signature = "LPJData",
@@ -39,6 +41,7 @@ setReplaceMethod(f ="runInfo",
                    #validObject(object); object
                    }
                  )
+
 setGeneric("dataTypes<-", function(object, value) standardGeneric("dataTypes<-"))
 setReplaceMethod(f = "dataTypes",
                  signature ="LPJData",
@@ -47,28 +50,16 @@ setReplaceMethod(f = "dataTypes",
                    #validObject(object); object
                    }
                  )
+# Extract parts of LPJData
+#
+#setMethod(f ="[[",
+#          signature(x = "LPJData", i = "ANY", j="ANY"),
+#          definition = function(x,i,j,drop){
+#            if(i=="runInfo"){return(x@runInfo)}else {}
+#            if(i=="dataTypes"){return(x@dataTypes)}else {}
+#          }
+#          )
 
-setMethod(f ="[[",
-          signature ="LPJData",
-          definition = function(x,i,j,drop){
-            if(i=="runInfo"){return(x@runInfo)}else {}
-            if(i=="dataTypes"){return(x@dataTypes)}else {}
-          }
-          )
-
-
-setGeneric("getDataTypes",
-           function(object){
-             standardGeneric("getDataTypes")
-             }
-           )
-
-setMethod(f= "getDataTypes",
-          signature ="LPJData",
-          definition = function(object){
-            return(object@dataTypes)
-            }
-          )
 
 setMethod (f= "show",
              signature ="LPJData",

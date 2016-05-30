@@ -30,10 +30,10 @@ setClass("LPJSetup",
 )
 
 
-#' @docType methods
-#' @rdname intialize-LPJSetup
-#' @title TODO
-#' @name TODO
+# methods
+# intialize-LPJSetup
+# TODO
+# TODO
 setMethod(f= "initialize",
            signature="LPJSetup",
            definition= function(.Object, clusterType, numCores, mainDir, runDir,
@@ -94,18 +94,18 @@ setReplaceMethod(f = "outDir",
                    #validObject(object); object
                  }
 )
-
-setMethod(f ="[[",
-          signature ="LPJSetup",
-          definition = function(x,i,j,drop){
-            if(i=="clusterType"){return(x@clusterType)}else {}
-            if(i=="numCores"){return(x@numCores)}else {}
-            if(i=="mainDir"){return(x@mainDir)}else {}
-            if(i=="runDir"){return(x@runDir)}else {}
-            if(i=="outDir"){return(x@outDir)}else {}
-          }
-          )
-
+# Extract parts of LPJSetup
+#
+#setMethod(f ="[[",
+#          signature(x = "LPJData", i = "ANY"),
+#          definition = function(x,i,drop){
+#            if(i=="clusterType"){return(x@clusterType)}else {}
+#            if(i=="numCores"){return(x@numCores)}else {}
+#            if(i=="mainDir"){return(x@mainDir)}else {}
+#            if(i=="runDir"){return(x@runDir)}else {}
+#            if(i=="outDir"){return(x@outDir)}else {}
+#          }
+#          )
 
 setMethod (f= "show",
              signature ="LPJSetup",

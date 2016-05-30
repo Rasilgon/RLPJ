@@ -1,13 +1,12 @@
-#' @title The function to fill the single run object
-#'
-#' @description This function TODO
-#' @param singleObject TODO
-#' @param runDir TODO
-#' @param outDir TODO
-#' @param parameterList TODO
-#' @param ID TODO
-#' @export
-#' @return TODO
+# @title The function to fill the single run object
+#
+# @description This function TODO
+# @param mainDir a character string indicating the path to the main directory
+# @param typeList a character vector with the outputs to be analyzed.
+#  Default value is all outputs.
+# @param settings additional parameters
+# @seealso  \code{\link{runLPJ}}
+# @return TODO
 createSingleObject <- function(mainDir, typeList, settings){
 
   defaultSettings <- list(gridList= NULL, scale = NULL, mode = NULL,
@@ -17,7 +16,8 @@ createSingleObject <- function(mainDir, typeList, settings){
                         plot.data = FALSE, save.plots = FALSE, processing = FALSE,
                         delete = TRUE,  runID = "")
 
-  settings <- c(settings[names(settings) %in% names(defaultSettings)], defaultSettings[ !names(defaultSettings) %in% names(settings)])
+  settings <- c(settings[names(settings) %in% names(defaultSettings)],
+                defaultSettings[ !names(defaultSettings) %in% names(settings)])
 
   # mode
   if (is.null(settings[["mode"]]) || settings[["mode"]] != "cf" & settings[["mode"]] != "cru"){
@@ -30,6 +30,8 @@ createSingleObject <- function(mainDir, typeList, settings){
     settings$typeList <-  typelist.default
     cat("\n\nOutput typeList has not been provided")
     cat("\nSetting typeList to default values")
+  }else{
+    settings$typeList <- typeList
   }
   # checking template1
   if (is.null(settings[["template1"]])){

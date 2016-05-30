@@ -8,7 +8,7 @@ plotLPJData(data = NULL, typeList = NULL, outDir = NULL,
   save.plots = FALSE, prefix = "")
 }
 \arguments{
-\item{data}{a list of data contained in the LPJ data object.}
+\item{data}{a LPJData object}
 
 \item{typeList}{a character vector with the outputs to be plotted}
 
@@ -31,7 +31,7 @@ Data in the data object is already a time series object, but stored as a matrix.
 }
 \examples{
 \dontrun{
-plotLPJData(dataList = list( aaet = aaet), typeList = c("aaet"),
+plotLPJData(data, typeList = c("aaet"),
  outDir = "/runDir/outDir", save.plots = FALSE)
 }
 }

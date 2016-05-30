@@ -14,6 +14,7 @@
 #' @seealso \url{https://cran.r-project.org/web/packages/zoo/zoo.pdf}
 #' @author Florian Hartig, Ramiro Silveyra Gonzalez, Maurizio Bagnara
 #' @note Based on an older code of Joerg Steinkamp
+#' @export
 #' @examples \dontrun{
 #' LPJout <- getData( typeList = c("aaet",  "cflux","lai", "nflux"),
 #'           "~/path/to/output/files", runInfo = list(parameter1 = 0.5, grid = 1))
@@ -54,12 +55,12 @@ getData <- function(typeList = NULL, outDir=NULL, runInfo=NULL, processing = TRU
   for (i in 1:length(typeList)){
     if (file.exists(file.path(outDir, paste(typeList[[i]], ".out", sep="")))){
         if ( file.info( file.path(outDir, paste(typeList[[i]], ".out", sep="")) )[['size']] == 0){
-        message( paste("The",  typeList[[i]], ".out is empty!\n", sep = " ") )
+        warning( paste("The",  typeList[[i]], ".out is empty!", sep = "") )
       }else{
         keep[i] <- TRUE
       }
     }else{
-      message( paste("There is no ",  typeList[[i]], ".out\n", sep = "") )
+      warning( paste("There is no ",  typeList[[i]], ".out", sep = "") )
       }
     }
   if (any(keep)){
@@ -68,7 +69,7 @@ getData <- function(typeList = NULL, outDir=NULL, runInfo=NULL, processing = TRU
     listData <- vector(mode="list", length=length(typeList.valid))
     names(listData) <- typeList.valid
   }else{
-    warning("There are not model outputs. Please check the guess.log files.")
+    stop("There are not model outputs. Please check the guess.log files")
     run.function <- FALSE
     listData  <- list(NA)
   }
@@ -166,6 +167,7 @@ getData <- function(typeList = NULL, outDir=NULL, runInfo=NULL, processing = TRU
       }
     }
   }
+
   # add it to the data class
   LPJout <- new(Class="LPJData",
                 runInfo=runInfo,

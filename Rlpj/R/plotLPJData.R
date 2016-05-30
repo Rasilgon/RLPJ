@@ -3,7 +3,7 @@
 #' a time series with zoo and plots the variables against time.
 #' Plots are saved in the output folder, if the save.plots boolean is set to TRUE.
 #' Data in the data object is already a time series object, but stored as a matrix.
-#' @param data a list of data contained in the LPJ data object.
+#' @param data a LPJData object
 #' @param outDir a character string indicating the folder where the plots will be
 #' saved, if save.plot set to TRUE
 #' @param save.plots a boolean indicating whether the plots are saved in the outDir
@@ -16,7 +16,7 @@
 #' @keywords Rlpj
 #' @author Florian Hartig, Ramiro Silveyra Gonzalez
 #' @examples \dontrun{
-#' plotLPJData(dataList = list( aaet = aaet), typeList = c("aaet"),
+#' plotLPJData(data, typeList = c("aaet"),
 #'  outDir = "/runDir/outDir", save.plots = FALSE)
 #' }
 plotLPJData <- function(data = NULL, typeList = NULL, outDir= NULL,
@@ -25,6 +25,9 @@ plotLPJData <- function(data = NULL, typeList = NULL, outDir= NULL,
   # checking input parameters
   if (is.null(data)){
     stop("No data has been provided")
+  }
+  if (!class(data)=="LPJData"){
+    stop("Invalid data has been provided")
   }
   if (save.plots){
     if ( is.null(outDir) || !file.exists(outDir)){
@@ -35,15 +38,7 @@ plotLPJData <- function(data = NULL, typeList = NULL, outDir= NULL,
     stop("Can't load required library 'zoo'.")
   }
 
-  #if(grepl("Rdata", data )==TRUE){
-  #  if(!file.exists(data)){
-  #    stop("No valid data has been provided")
-  #  }else{
-  #    load(data)
-      # Check what is available
-  #    data <- runObject$output
-  #  }
-  #}
+  data <- data@dataTypes
   # Plot from
   typeList.available <- names(data)
   if (is.null(typeList)){

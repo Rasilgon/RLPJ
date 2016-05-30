@@ -1,13 +1,11 @@
-#' @docType package
-#' @aliases Rlpj
-#' @name Rlpj
+#' @name Rlpj-package
 #' @title Overview of the functions in the Rlpj package
 #' @description The RLPJ package provides functions to run LPJ-Guess within R.
 #' It allows also to parallelize the execution of LPJ-Guess in personal laptops
 #' and in HPC.
 #'
 #' The package should be particularly useful for users aiming at integrating LPj outputs
-#' in R routines and parellization LPJ-Guess
+#' in R routines and parellizing LPJ-Guess
 #'
 #' Below is a list of the functions grouped by theme. See the vignette for more
 #' information and some examples   (you can open it by running this command:
@@ -36,5 +34,6 @@
 #' @keywords package
 #' @keywords LPJ-Guess
 
+"_PACKAGE"
 
 # here is good place for imports
