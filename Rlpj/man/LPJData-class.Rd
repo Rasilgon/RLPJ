@@ -3,12 +3,15 @@
 \docType{class}
 \name{LPJData-class}
 \alias{LPJData-class}
-\title{A LPJ-GUESS data class object}
+\title{A LPJData class object}
 \value{
-a data class object with the slots runInfo and dataTypes
+a S4 class object with two slots: \itemize{
+\item  runInfo contains a list with the information used to run the model such as templates and parameters
+\item  dataTypes contains a list with the model outputs
+}
 }
 \description{
-This is a data class object to store both the LPJ-GUESS outputs
+This is a S4 class object to store both the LPJ-GUESS outputs
 and the information that was passed to LPJ-GUESS.
 }
 \author{

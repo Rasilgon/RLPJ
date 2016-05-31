@@ -16,7 +16,7 @@
 checkParameters <- function(scale = NULL, parameterList = NULL){
   # include check
   if ( scale != "global" & scale != "europe"){
-    stop("checkParameters: Cannot recognize the template: neither global nor europe.")
+    stop("checkParameters: Cannot recognize the template: neither global nor europe")
   }
   # call the default template
   default <- parameterList.default[[scale]]

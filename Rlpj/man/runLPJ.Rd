@@ -10,20 +10,20 @@ runLPJ(x = NULL, typeList = NULL, parameterList = NULL, settings = NULL)
 \item{x}{either a LPJSetup object created with the setupLPJParallel function or a
 character string indicating the path to the directory where
 all input data and template are located and in which the function will create
-the directory structure for the outputs.}
+the directory structure for the outputs}
 
 \item{typeList}{a character vector with the outputs to be analyzed.
-Default value is all outputs.}
+Default value is all outputs}
 
 \item{parameterList}{a named list containing the parameters to be calibrated}
 
 \item{settings}{additional parameters \itemize{
 \item  gridList a character string providing the name of the text file with
 the grids to be included in the model, e.g gridlist.txt. It must be in the mainDir.
-Provide only the file name, not the path.
+Provide only the file name, not the path
 \item mode a character string indicating whether using cru or cf data
 \item scale a character string indicating whether the model runs global or
-for europe.
+for europe
 \item  mode a character string indicating whether using cru or cf data
 \item file.co2 a character string providing the absolute path to the C02 input file
 \item file.cru a character string providing the absolute path to the cru input file
@@ -39,96 +39,79 @@ precipitation input file
  insolation input file
 \item template1  character string providing the general model template,
  e.g, global.ins. It must be in the mainDir. Provide only the file name,
-  not the path. If not provided, package templates will be used.
+  not the path. If not provided, package templates will be used
 \item template2 a character string providing the  "specific" model template,
  e.g, global_cf.ins or global_cru.ins. It must be in the mainDir. Provide
  only the file name, not the path. If not provided, package templates will be
-  used.
+  used
 \item plot.data  a boolean indicating whether the ouput data will be plotted
- (default FALSE).
+ (default FALSE)
 \item save.plots  a boolean indicating whether the plots will be saved (default
- FALSE).
-\item processing a boolean indicating whether output files will be turned into
- time series (default FALSE).
+ FALSE)
+\item processing a boolean indicating whether output files will be turned into zoo
+ time series (default FALSE). This is only supported when running the model
+ for one grid cell. For several grid cells, please set processing to FALSE.
 \item delete a boolean indicating whether output files should be deleted after
- processing (default TRUE). Saved plots will not be deleted.
+ processing (default TRUE). Saved plots will not be deleted
 \item runID an integer after which the output directory will be named (default empty).
-If parallel TRUE, ID is ignored and defined by setupLPJParallel.
+If parallel TRUE, ID is ignored and defined by setupLPJParallel
 }}
 }
 \value{
-a object of class LPJData
+a object of class LPJData. The LPJData object will be automatically stored as RData
+in a folder in the mainDir. The folder will be named as runInfo plus the date in format %Y_%m_%d_%H%M%S.
 }
 \description{
 This function reads the setup parallel object and creates a
  cluster to which it submits the model wrapper function with its respective
- parameters.#'
+ parameters.
 }
 \details{
 The runLPJ in parallel assumes the existence of a folder containing all
 the inputs data and templates for LPJ-GUESS and a directory structure for
-storing inputs and outputs of each single run. The setupLPJParallel function is
-ought to be run before calling the runLPJparallel.
+storing inputs and outputs of each single run.
 Running the LPJ parallel involves two steps. First, to create a parallel
-setup (setupParallel function), and second, to actually run in parallel the model
-(runLPJparallel function).  The parallelization requires the packages snow and
- also the Rmpi package, if you aim at using a MPI cluster.
+setup (\code{\link{setupLPJParallel}}), and second, to actually run in parallel the model
+(\code{\link{runLPJ}}).  The parallelization requires the package snow for SOCK clusters or
+the package Rmpi for MPI clusters.
 }
 \section{Warning}{
- When running on MPI cluster, please call the function \code{\link{exitMPI}}
-before you finish you terminate you are R session.
+ When using MPI clusters, please call the function \code{\link{exitMPI}}
+before terminating your R session.
 }
 \examples{
 \dontrun{
- # You need to specify the absolute path of each input file:
+
 file.co2<-"/some/absolute/path/crudata/co2_1901-2013.txt"
 file.cru <- "/some/absolute/path/crudata/cru_1901_2006.bin"
 file.cru.misc <- "/some/absolute/path/crudata/cru_1901_2006misc.bin"
 file.ndep <- "/some/absolute/path/crudata/GlobalNitrogenDeposition.bin"
-
-# If you are using the global_cf.ins file you need to specify the site
-# specific input files as well
 file.temp <- "/some/absolute/path/cfdata/temp.nc"
 file.prec <- "/some/absolute/path/cfdata/prec.nc"
 file.insol <- "/some/absolute/path/cfdata/rad.nc"
 
-# mainDir <- "/some/absolute/path/mainDir"
+mainDir <- "/some/absolute/path/mainDir"
 list.files(mainDir)
-   [1] "guess" or "guesscmd.exe"  # link to the model executable
-   [2] "gridlist.txt"             # list of gridcells
-   [3] "global.ins"               # template1 (optional)
-   [4] "global_cru.ins"           # template2 (optional)
+[1] "guess" or "guesscmd.exe"  # link to the model executable
+[2] "gridlist.txt"      # list of gridcells
+[3] "global.ins"        # template1 (optional)
+[4] "global_cru.ins"    # template2 (optional)
+
+# General settings
+settings <- list (gridList = gridList,mode = "cf", scale = "global",
+                file.co2 = file.co2, file.cru = file.cru, file.cru.misc = file.cru.misc,
+                file.ndep = file.ndep, file.temp = file.temp, file.prec = file.prec,
+                file.insol = file.insol, delete = F)
 
 
 # Single  Run
-settings <- list (gridList = gridList,mode = "cf", scale = "global",
-                 file.co2 = file.co2, file.cru = file.cru, file.cru.misc = file.cru.misc,
-                 file.ndep = file.ndep, file.temp = file.temp, file.prec = file.prec,
-                 file.insol = file.insol, delete = F)
- result <-   runLPJ(mainDir, settings= settings)
-
-
-       Output typeList has not been provided
-       Setting typeList to default values
-
-       Using package template (template 1)
-       Saving package template in the mainDir
-
-       Using package template (template 2)
-       Saving package template in the mainDir
-
-       You have not provided a parameter list
-       Model will run with default values
-
-       Starting run 1
-       Calling "/some/absolute/path/guess -input cf "/some/absolute/path/runDirectory/global_cf.ins
-       Finished run 1
+ result <-  runLPJ(mainDir, settings= settings)
  result
      class              : LPJData
      LPJ template 1     : global.ins
      LPJ template 2     : global_cf.ins
-     grid cells         : ! grid_ID  Location(spaces are ok) 0  Frankfurt Flüghafen
-     run directory      : /home/trashtos/GitHub/lpjRun/runDirectory
+     grid cells         : 99  Somewhere
+     run directory      : /some/absolute/path/mainDir/runDirectory
      LPJ model outputs  : 39 outputs
      aaet agpp aiso amon anpp cflux clitter cmass cpool cton_leaf dens
      firert fpc speciesheight lai maet mevap mgpp mintercep miso mlai mmon
@@ -136,10 +119,9 @@ settings <- list (gridList = gridList,mode = "cf", scale = "global",
      nlitter nmass npool nsources nuptake runoff vmaxnlim
 
 
-#Parallel Run
-
+#  Parallel Run
 # Create some paramaters to test the model.
-# Number of runs is proportional to number of parameter set you are testing
+# Number of runs is proportional to number of parameter being testet
 parameterDefault <- list (run_emax = NULL)
 
 # Test 6 different values for emax.
@@ -156,24 +138,6 @@ mySetup  <- setupLPJParallel(3, "SOCK", "cf", mainDir = "/some/absolute/path/mai
 
 # Call runLPJ
 result <- runLPJ(mySetup, settings= settings, parameterList = parameterList)
-
-   Output typeList has not been provided
-   Setting typeList to default values
-
-   Using package template (template 1)
-   Saving package template in the mainDir
-
-   Using package template (template 2)
-   Saving package template in the mainDir
-
-   Checking conditions
-   Reading the parallel object structure
-   |=============================================================| 100\%
-   Creating a SOCK cluster with 3 cores
-   Sending tasks to the cores
-
-   Processing ended!
-
 str(result,1)
    List of 6
    $ :Formal class 'LPJData' [package "Rlpj"] with 2 slots

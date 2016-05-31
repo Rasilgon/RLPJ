@@ -26,7 +26,7 @@ createSingleObject <- function(mainDir, typeList, settings){
   if ( is.null(settings[["scale"]]) || settings[["scale"]] != "global" & settings[["scale"]] != "europe"){ # this is relevant if getting template
     stop("Please provide a valid scale: global or europe")
   }
-  if (is.null(typeList)){
+  if (is.null(typeList) || !class(typeList) == "character"){
     settings$typeList <-  typelist.default
     cat("\n\nOutput typeList has not been provided")
     cat("\nSetting typeList to default values")
@@ -37,8 +37,8 @@ createSingleObject <- function(mainDir, typeList, settings){
   if (is.null(settings[["template1"]])){
     # writing out template and storing name
     settings$template1 <- getTemplate (settings[["scale"]], outputDir = mainDir)
-    cat("\n\nUsing package template (template 1).")
-    cat("\nSaving package template in the mainDir.")
+    cat("\n\nUsing package template (template 1)")
+    cat("\nSaving package template in the mainDir")
   }else if (!file.exists(file.path(mainDir, settings[["template1"]]))){
     warning ("The provided template (template1) does not exist")
     stop("Please provide a valid template name")
@@ -48,15 +48,15 @@ createSingleObject <- function(mainDir, typeList, settings){
     # writing out template and storing name
     settings$template2 <- getTemplate (type = paste(settings[["scale"]],"_", settings[["mode"]], sep = ""),
                               outputDir = mainDir)
-    cat("\n\nUsing package template (template 2).")
-    cat("\nSaving package template in the mainDir.")
+    cat("\n\nUsing package template (template 2)")
+    cat("\nSaving package template in the mainDir")
   }else if (!file.exists(file.path(mainDir, settings[["template2"]]))){
     warning ("The provided template (template2) does not exist")
     stop("Please provide a valid template name")
   }
   # checking gridlist
   if ( is.null(settings[["gridList"]]) || !file.exists(file.path(mainDir, settings[["gridList"]]))){
-    stop ("Please provide a valid grid list.")
+    stop ("Please provide a valid grid list")
   }
 
   # Pack up all files that user should have provided

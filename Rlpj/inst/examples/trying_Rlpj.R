@@ -16,7 +16,7 @@ mainDir <- "/home/trashtos/GitHub/lpjRun"
 gridList <- "gridlist_geb.txt"
 
 
-settings <- list (gridList = gridList,mode = "cf", scale = "global",
+settings <- list (gridList = gridList,mode = "cf", scale = "europe",
                   file.co2 = file.co2, file.cru = file.cru, file.cru.misc = file.cru.misc,
                   file.ndep = file.ndep, file.temp = file.temp, file.prec = file.prec,
                   file.insol = file.insol, delete = F, plot.data =T, save.plots=F)

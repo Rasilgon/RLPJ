@@ -8,7 +8,7 @@ writeTemplate(template1 = NULL, parameterList = NULL, runDir = NULL)
 }
 \arguments{
 \item{template1}{a character string providing the general model template,
-e.g, global.ins. Provide only the file name, not the path.}
+e.g, global.ins. Provide only the file name, not the path}
 
 \item{parameterList}{a named list containing the parameters to be calibrated}
 

@@ -9,11 +9,12 @@ setupLPJParallel(numCores = NULL, clusterType = NULL, mainDir = NULL)
 \arguments{
 \item{numCores}{a integer specifying number of cores of the cluster}
 
-\item{clusterType}{a character string indicating the type of cluster to be created. If running in bwHPC,
-type must be "MPI". If running in personal computer, type must be "SOCK".}
+\item{clusterType}{a character string indicating the type of cluster to be created.
+If running on personal computer, type should be SOCK. If running on HPC,
+type should be MPI}
 
 \item{mainDir}{a character string indicating the path to the directory where
-all input data and template are located and in which the function will create
+the template and the model link are located and in which the function will create
 the directory structure for the outputs}
 }
 \value{
@@ -41,9 +42,9 @@ mySetup
      cluster type       : SOCK
      number of cores    : 3
      output directories :
-     /home/trashtos/GitHub/lpjRun/runDirectory1
-     /home/trashtos/GitHub/lpjRun/runDirectory2
-     /home/trashtos/GitHub/lpjRun/runDirectory3
+     /some/absolute/path/mainDir/runDirectory1
+     /some/absolute/path/mainDir/runDirectory2
+    /some/absolute/path/mainDir/runDirectory3
 }
 }
 \author{

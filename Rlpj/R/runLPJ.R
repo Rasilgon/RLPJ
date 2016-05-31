@@ -1,21 +1,21 @@
 #' @title The function to run the LPJ in parallel
 #' @description This function reads the setup parallel object and creates a
 #'  cluster to which it submits the model wrapper function with its respective
-#'  parameters.#'
+#'  parameters.
 #' @param x either a LPJSetup object created with the setupLPJParallel function or a
 #'  character string indicating the path to the directory where
 #'  all input data and template are located and in which the function will create
-#'  the directory structure for the outputs.
+#'  the directory structure for the outputs
 #' @param parameterList a named list containing the parameters to be calibrated
 #' @param typeList a character vector with the outputs to be analyzed.
-#' Default value is all outputs.
+#' Default value is all outputs
 #' @param settings additional parameters \itemize{
 #' \item  gridList a character string providing the name of the text file with
 #' the grids to be included in the model, e.g gridlist.txt. It must be in the mainDir.
-#' Provide only the file name, not the path.
+#' Provide only the file name, not the path
 #' \item mode a character string indicating whether using cru or cf data
 #' \item scale a character string indicating whether the model runs global or
-#' for europe.
+#' for europe
 #' \item  mode a character string indicating whether using cru or cf data
 #' \item file.co2 a character string providing the absolute path to the C02 input file
 #' \item file.cru a character string providing the absolute path to the cru input file
@@ -31,34 +31,35 @@
 #'  insolation input file
 #' \item template1  character string providing the general model template,
 #'  e.g, global.ins. It must be in the mainDir. Provide only the file name,
-#'   not the path. If not provided, package templates will be used.
+#'   not the path. If not provided, package templates will be used
 #' \item template2 a character string providing the  "specific" model template,
 #'  e.g, global_cf.ins or global_cru.ins. It must be in the mainDir. Provide
 #'  only the file name, not the path. If not provided, package templates will be
-#'   used.
+#'   used
 #' \item plot.data  a boolean indicating whether the ouput data will be plotted
-#'  (default FALSE).
+#'  (default FALSE)
 #' \item save.plots  a boolean indicating whether the plots will be saved (default
-#'  FALSE).
-#' \item processing a boolean indicating whether output files will be turned into
-#'  time series (default FALSE).
+#'  FALSE)
+#' \item processing a boolean indicating whether output files will be turned into zoo
+#'  time series (default FALSE). This is only supported when running the model
+#'  for one grid cell. For several grid cells, please set processing to FALSE.
 #' \item delete a boolean indicating whether output files should be deleted after
-#'  processing (default TRUE). Saved plots will not be deleted.
+#'  processing (default TRUE). Saved plots will not be deleted
 #' \item runID an integer after which the output directory will be named (default empty).
-#' If parallel TRUE, ID is ignored and defined by setupLPJParallel.
+#' If parallel TRUE, ID is ignored and defined by setupLPJParallel
 #' }
-#' @return a object of class LPJData
+#' @return a object of class LPJData. The LPJData object will be automatically stored as RData
+#' in a folder in the mainDir. The folder will be named as runInfo plus the date in format %Y_%m_%d_%H%M%S.
 #' @export
-#' @section Warning: When running on MPI cluster, please call the function \code{\link{exitMPI}}
-#' before you finish you terminate you are R session.
+#' @section Warning: When using MPI clusters, please call the function \code{\link{exitMPI}}
+#' before terminating your R session.
 #' @details The runLPJ in parallel assumes the existence of a folder containing all
 #' the inputs data and templates for LPJ-GUESS and a directory structure for
-#' storing inputs and outputs of each single run. The setupLPJParallel function is
-#' ought to be run before calling the runLPJparallel.
+#' storing inputs and outputs of each single run.
 #' Running the LPJ parallel involves two steps. First, to create a parallel
-#' setup (setupParallel function), and second, to actually run in parallel the model
-#' (runLPJparallel function).  The parallelization requires the packages snow and
-#'  also the Rmpi package, if you aim at using a MPI cluster.
+#' setup (\code{\link{setupLPJParallel}}), and second, to actually run in parallel the model
+#' (\code{\link{runLPJ}}).  The parallelization requires the package snow for SOCK clusters or
+#' the package Rmpi for MPI clusters.
 #' @seealso  \url{https://cran.r-project.org/web/packages/Rmpi/Rmpi.pdf},
 #'  \url{https://cran.r-project.org/web/packages/snow/snow.pdf},
 #'  \code{\link{setupLPJParallel}}, \code{\link{exitMPI}}
@@ -66,55 +67,38 @@
 #' @keywords Rlpj
 #' @author Florian Hartig, Ramiro Silveyra Gonzalez
 #' @examples \dontrun{
-#'  # You need to specify the absolute path of each input file:
+#'
 #' file.co2<-"/some/absolute/path/crudata/co2_1901-2013.txt"
 #' file.cru <- "/some/absolute/path/crudata/cru_1901_2006.bin"
 #' file.cru.misc <- "/some/absolute/path/crudata/cru_1901_2006misc.bin"
 #' file.ndep <- "/some/absolute/path/crudata/GlobalNitrogenDeposition.bin"
-#'
-#' # If you are using the global_cf.ins file you need to specify the site
-#' # specific input files as well
 #' file.temp <- "/some/absolute/path/cfdata/temp.nc"
 #' file.prec <- "/some/absolute/path/cfdata/prec.nc"
 #' file.insol <- "/some/absolute/path/cfdata/rad.nc"
 #'
-#' # mainDir <- "/some/absolute/path/mainDir"
+#' mainDir <- "/some/absolute/path/mainDir"
 #' list.files(mainDir)
-#'    [1] "guess" or "guesscmd.exe"  # link to the model executable
-#'    [2] "gridlist.txt"             # list of gridcells
-#'    [3] "global.ins"               # template1 (optional)
-#'    [4] "global_cru.ins"           # template2 (optional)
+#' [1] "guess" or "guesscmd.exe"  # link to the model executable
+#' [2] "gridlist.txt"      # list of gridcells
+#' [3] "global.ins"        # template1 (optional)
+#' [4] "global_cru.ins"    # template2 (optional)
+#'
+#' # General settings
+#' settings <- list (gridList = gridList,mode = "cf", scale = "global",
+#'                 file.co2 = file.co2, file.cru = file.cru, file.cru.misc = file.cru.misc,
+#'                 file.ndep = file.ndep, file.temp = file.temp, file.prec = file.prec,
+#'                 file.insol = file.insol, delete = F)
 #'
 #'
 #' # Single  Run
-#' settings <- list (gridList = gridList,mode = "cf", scale = "global",
-#'                  file.co2 = file.co2, file.cru = file.cru, file.cru.misc = file.cru.misc,
-#'                  file.ndep = file.ndep, file.temp = file.temp, file.prec = file.prec,
-#'                  file.insol = file.insol, delete = F)
-#'  result <-   runLPJ(mainDir, settings= settings)
-#'
-#'
-#'        Output typeList has not been provided
-#'        Setting typeList to default values
-#'
-#'        Using package template (template 1)
-#'        Saving package template in the mainDir
-#'
-#'        Using package template (template 2)
-#'        Saving package template in the mainDir
-#'
-#'        You have not provided a parameter list
-#'        Model will run with default values
-#'
-#'        Starting run 1
-#'        Calling "/some/absolute/path/guess -input cf "/some/absolute/path/runDirectory/global_cf.ins
-#'        Finished run 1
+
+#'  result <-  runLPJ(mainDir, settings= settings)
 #'  result
 #'      class              : LPJData
 #'      LPJ template 1     : global.ins
 #'      LPJ template 2     : global_cf.ins
-#'      grid cells         : ! grid_ID  Location(spaces are ok) 0  Frankfurt Flüghafen
-#'      run directory      : /home/trashtos/GitHub/lpjRun/runDirectory
+#'      grid cells         : 99  Somewhere
+#'      run directory      : /some/absolute/path/mainDir/runDirectory
 #'      LPJ model outputs  : 39 outputs
 #'      aaet agpp aiso amon anpp cflux clitter cmass cpool cton_leaf dens
 #'      firert fpc speciesheight lai maet mevap mgpp mintercep miso mlai mmon
@@ -122,10 +106,9 @@
 #'      nlitter nmass npool nsources nuptake runoff vmaxnlim
 #'
 #'
-#' #Parallel Run
-#'
+#' #  Parallel Run
 #' # Create some paramaters to test the model.
-#' # Number of runs is proportional to number of parameter set you are testing
+#' # Number of runs is proportional to number of parameter being testet
 #' parameterDefault <- list (run_emax = NULL)
 #'
 #' # Test 6 different values for emax.
@@ -142,24 +125,6 @@
 #'
 #' # Call runLPJ
 #' result <- runLPJ(mySetup, settings= settings, parameterList = parameterList)
-#'
-#'    Output typeList has not been provided
-#'    Setting typeList to default values
-#'
-#'    Using package template (template 1)
-#'    Saving package template in the mainDir
-#'
-#'    Using package template (template 2)
-#'    Saving package template in the mainDir
-#'
-#'    Checking conditions
-#'    Reading the parallel object structure
-#'    |=============================================================| 100%
-#'    Creating a SOCK cluster with 3 cores
-#'    Sending tasks to the cores
-#'
-#'    Processing ended!
-#'
 #' str(result,1)
 #'    List of 6
 #'    $ :Formal class 'LPJData' [package "Rlpj"] with 2 slots
@@ -181,16 +146,17 @@ runLPJ <-  function(x=NULL, typeList=NULL, parameterList=NULL, settings = NULL){
   #----------------------------------------------------------------------------#
   # SERIAL RUNLPJ
   #----------------------------------------------------------------------------#
-    if (is.null(settings) || !typeof(settings) == "list"){
+    if (is.null(settings) || !class(settings) == "list"){
         stop("Invalid settings provided")
     }
     if(!file.exists(x)){
       stop("Invalid main directory")
     }
     if ( is.null(parameterList)){
-      cat ("\n\nYou have not provided a parameter list.")
+      cat ("\n\nYou have not provided a parameter list")
       cat ("\nModel will run with default values")
-    }else if(!typeof(parameterList) == "list"){
+
+    }else if(!class(parameterList) == "list"){
       stop("Please provide a valid parameter list")
     }
 
@@ -200,6 +166,7 @@ runLPJ <-  function(x=NULL, typeList=NULL, parameterList=NULL, settings = NULL){
       stop("Invalid settings provided")
     }
 
+    singleRun$parameterList <- getParameterList(singleRun$scale)
 
     dir.create(singleRun$runInfoDir, showWarnings = FALSE)
     # Need to create an output folder named after ID
@@ -208,6 +175,8 @@ runLPJ <-  function(x=NULL, typeList=NULL, parameterList=NULL, settings = NULL){
                                   paste("outDirectory", singleRun$runID, sep=""))
     dir.create(singleRun$runDir, showWarnings = FALSE)
     dir.create(singleRun$outDir, showWarnings = FALSE)
+
+
 
 
     #
@@ -239,10 +208,10 @@ runLPJ <-  function(x=NULL, typeList=NULL, parameterList=NULL, settings = NULL){
   #----------------------------------------------------------------------------#
   }else if(class(x) == "LPJSetup"){
 
-  if (is.null(settings) || !typeof(settings) == "list"){
+  if (is.null(settings) || !class(settings) == "list"){
       stop("Invalid settings provided")
     }
-  if ( is.null(parameterList) || !typeof(parameterList) == "list"){
+  if ( is.null(parameterList) || !class(parameterList) == "list"){
       stop("Please provide a valid parameter list")
     }
   # do the settings check
@@ -253,11 +222,11 @@ runLPJ <-  function(x=NULL, typeList=NULL, parameterList=NULL, settings = NULL){
   # setup object has all needed for pallel structure
   # Checking packages availability
   if (!requireNamespace("snow", quietly = TRUE)){
-    stop("Can't load required library 'snow', runLPJparallel will now exit.")
+    stop("Can't load required library 'snow', runLPJparallel will now exit")
   }
   if (x@clusterType=="MPI"){
     if (!requireNamespace("Rmpi", quietly = TRUE)){
-      stop("Can't load required library 'Rmpi', runLPJparallel will now exit.")
+      stop("Can't load required library 'Rmpi', runLPJparallel will now exit")
     }else{
       # check cluster size
       numCores.available <- Rmpi::mpi.universe.size() - 1
@@ -338,8 +307,8 @@ runLPJ <-  function(x=NULL, typeList=NULL, parameterList=NULL, settings = NULL){
     snow::clusterEvalQ(cl, "runParameters")
     # Distribute calculation: will return values as a list object
     cat ("\nSending tasks to the cores\n")
-    #result <- snow::clusterMap(cl, runLPJWrapper,  runParameters )
-    result <- snow::clusterApply(cl, runParameters, runLPJWrapper )
+    result <- snow::clusterMap(cl, runLPJWrapper,  runParameters )
+    #result <- snow::clusterApply(cl, runParameters, runLPJWrapper )
     # Destroy cluster
     snow::stopCluster(cl)
     # deliver data to clusters
@@ -372,10 +341,11 @@ runLPJ <-  function(x=NULL, typeList=NULL, parameterList=NULL, settings = NULL){
     Rmpi::mpi.bcast.cmd(library(Rlpj))
     result <- Rmpi::mpi.parSapply(cores, MPISapply, runParameters = runParameters)
   }
-  #----------------------------------------------------------------------------#
   # END
   #----------------------------------------------------------------------------#
   return(unlist(result))
+  }else{
+    stop("Please provide a valid value for x")
   }
 }
 

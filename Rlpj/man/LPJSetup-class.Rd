@@ -3,13 +3,24 @@
 \docType{class}
 \name{LPJSetup-class}
 \alias{LPJSetup-class}
-\title{A LPJ-GUESS data class object}
+\title{A LPJSetup class object}
 \value{
-a data class object with the slots runInfo and dataTypes
+a S4 class object with five slots
+\itemize{
+\item  clusterType a character string indicating the type of cluster to be created (MPI o SOCK)
+\item  numCores a integer specifying number of cores of the cluster
+\item  mainDir  a character string indicating the path to the directory where
+ the model link and the templates are located
+ the directory structure for the outputs
+\item  runDir a character string indicating the path to the directory where
+ the needed files for model run are located
+\item  outDir a character string indicating the path to the directory where
+ the model outputs will be saved
+}
 }
 \description{
-This is a data class object to store both the LPJ-GUESS outputs
-and the information that was passed to LPJ-GUESS.
+This is a S4 class object to store the configuration for parallel
+runs to be used by runLPJ.
 }
 \author{
 Ramiro Silveyra Gonzalez

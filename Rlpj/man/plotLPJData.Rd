@@ -4,11 +4,11 @@
 \alias{plotLPJData}
 \title{A plot function for LPJdata objects}
 \usage{
-plotLPJData(data = NULL, typeList = NULL, outDir = NULL,
+plotLPJData(x = NULL, typeList = NULL, outDir = NULL,
   save.plots = FALSE, prefix = "")
 }
 \arguments{
-\item{data}{a LPJData object}
+\item{x}{a LPJData object.}
 
 \item{typeList}{a character vector with the outputs to be plotted}
 
@@ -18,20 +18,22 @@ saved, if save.plot set to TRUE}
 \item{save.plots}{a boolean indicating whether the plots are saved in the outDir}
 
 \item{prefix}{a character string specifying the prefix to be added to the plots files.
-Only relevant if saving plots.}
+Only relevant if saving plots}
 }
 \value{
-plots for data types included in typeList
+plots for data types included in typeList. The grid cells will be plotted independently
 }
 \description{
-This function reads data from a LPJ data object, turns it into
-a time series with zoo and plots the variables against time.
+This function reads data from a LPJData object and plots the
+ variables against time.
+}
+\details{
 Plots are saved in the output folder, if the save.plots boolean is set to TRUE.
-Data in the data object is already a time series object, but stored as a matrix.
+The data is ploted as a zoo time series.
 }
 \examples{
 \dontrun{
-plotLPJData(data, typeList = c("aaet"),
+plotLPJData(data, typeList = c("aaet", "lai"),
  outDir = "/runDir/outDir", save.plots = FALSE)
 }
 }

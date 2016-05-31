@@ -1,8 +1,8 @@
-# RLPJ
+# Rlpj
 
 A R package that wraps the LPJ-GUESS model
 
-## Installing Rlpj
+#### Installing Rlpj
 
 Rlpj depends on three packages:
 
@@ -12,12 +12,26 @@ Rlpj depends on three packages:
 
 Installing Rmpi might be complicated. If you are thinking of using Rlpj on a laptop or workstation, you will be dealing with SOCK clusters and you do not need Rmpi.
 
-To avoid complications with installation, we recommend to install first the dependencies and then install Rlpj. For installing Rlpj directly from this repository, please type the following in Rstudio:
 
-    devtools::install_github("biometry/RLPJ/Rlpj", ref = "master", build_vignettes = TRUE)
+#### Recommended installation
 
-In the case you want to install the dependencies at the same time, set the dependencies flag to Depends
+Install the latest stable [release](link) with the devtools package as follows  
 
-    devtools::install_github("biometry/RLPJ/Rlpj", ref = "master", build_vignettes = TRUE, dependencies = "Depends")
+```{r}
+library(devtools)
+install_url("xxxxx")
+library(Rlpj)
+?Rlpj
+```
+You may want to check if the link above is really the latest stable realease. 
+
+#### Build the package yourself 
+
+Clone the package to your computer, and build with hand or Rstudio. If you need help see here http://biometry.github.io/APES/R/R70-PackageDevelopment.html
 
 
+In Rstudio, the vignette may not be built per default. You will turn this on in your project options, or run 
+
+```{r}
+devtools::build_vignettes("BayesianTools")
+```

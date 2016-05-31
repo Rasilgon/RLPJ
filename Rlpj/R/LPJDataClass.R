@@ -1,9 +1,12 @@
-#' @title A LPJ-GUESS data class object
+#' @title A LPJData class object
 #'
-#' @description This is a data class object to store both the LPJ-GUESS outputs
+#' @description  This is a S4 class object to store both the LPJ-GUESS outputs
 #' and the information that was passed to LPJ-GUESS.
 #'
-#' @return a data class object with the slots runInfo and dataTypes
+#' @return a S4 class object with two slots: \itemize{
+#' \item  runInfo contains a list with the information used to run the model such as templates and parameters
+#' \item  dataTypes contains a list with the model outputs
+#' }
 #' @keywords Rlpj
 #' @export
 #' @author Ramiro Silveyra Gonzalez

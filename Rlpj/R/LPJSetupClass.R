@@ -1,7 +1,19 @@
-#' @title A LPJ-GUESS data class object
-#' @description  This is a data class object to store both the LPJ-GUESS outputs
-#' and the information that was passed to LPJ-GUESS.
-#' @return a data class object with the slots runInfo and dataTypes
+#' @title A LPJSetup class object
+#'
+#' @description This is a S4 class object to store the configuration for parallel
+#' runs to be used by runLPJ.
+#' @return a S4 class object with five slots
+#' \itemize{
+#' \item  clusterType a character string indicating the type of cluster to be created (MPI o SOCK)
+#' \item  numCores a integer specifying number of cores of the cluster
+#' \item  mainDir  a character string indicating the path to the directory where
+#'  the model link and the templates are located
+#'  the directory structure for the outputs
+#' \item  runDir a character string indicating the path to the directory where
+#'  the needed files for model run are located
+#' \item  outDir a character string indicating the path to the directory where
+#'  the model outputs will be saved
+#' }
 #' @keywords Rlpj
 #' @export
 #' @author Ramiro Silveyra Gonzalez

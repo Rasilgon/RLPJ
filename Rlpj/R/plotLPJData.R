@@ -1,32 +1,32 @@
 #' @title A plot function for LPJdata objects
-#' @description  This function reads data from a LPJ data object, turns it into
-#' a time series with zoo and plots the variables against time.
-#' Plots are saved in the output folder, if the save.plots boolean is set to TRUE.
-#' Data in the data object is already a time series object, but stored as a matrix.
-#' @param data a LPJData object
+#' @description  This function reads data from a LPJData object and plots the
+#'  variables against time.
+#' @details Plots are saved in the output folder, if the save.plots boolean is set to TRUE.
+#' The data is ploted as a zoo time series.
+#' @param x a LPJData object.
 #' @param outDir a character string indicating the folder where the plots will be
 #' saved, if save.plot set to TRUE
 #' @param save.plots a boolean indicating whether the plots are saved in the outDir
 #' @param typeList a character vector with the outputs to be plotted
 #' @param prefix a character string specifying the prefix to be added to the plots files.
-#' Only relevant if saving plots.
-#' @return plots for data types included in typeList
+#' Only relevant if saving plots
+#' @return plots for data types included in typeList. The grid cells will be plotted independently
 #' @seealso \url{https://cran.r-project.org/web/packages/zoo/zoo.pdf}
 #' @export
 #' @keywords Rlpj
 #' @author Florian Hartig, Ramiro Silveyra Gonzalez
 #' @examples \dontrun{
-#' plotLPJData(data, typeList = c("aaet"),
+#' plotLPJData(data, typeList = c("aaet", "lai"),
 #'  outDir = "/runDir/outDir", save.plots = FALSE)
 #' }
-plotLPJData <- function(data = NULL, typeList = NULL, outDir= NULL,
+plotLPJData <- function(x=NULL, typeList = NULL, outDir= NULL,
                      save.plots = FALSE, prefix = ""){
 
   # checking input parameters
-  if (is.null(data)){
+  if (is.null(x)){
     stop("No data has been provided")
   }
-  if (!class(data)=="LPJData"){
+  if (!class(x)=="LPJData"){
     stop("Invalid data has been provided")
   }
   if (save.plots){
@@ -38,10 +38,11 @@ plotLPJData <- function(data = NULL, typeList = NULL, outDir= NULL,
     stop("Can't load required library 'zoo'.")
   }
 
-  data <- data@dataTypes
+  data <- x@dataTypes
   # Plot from
   typeList.available <- names(data)
-  if (is.null(typeList)){
+  if (is.null(typeList) || !class(typeList) == "character"){
+
     cat("\nNo typeList has been provided")
     cat("\nPlotting all data")
     typeList.valid <- typeList.available
@@ -63,23 +64,64 @@ plotLPJData <- function(data = NULL, typeList = NULL, outDir= NULL,
   # Checking existentce of data types # in theory do not need if your plotting from class object
   for (i in 1:length(typeList.valid)){
     df <- data[[typeList.valid[[i]] ]]
-    # something like is zoo
-    if(zoo::is.zoo(df) == FALSE){
-      df <- convertTS(df)
-    }
-    if (save.plots){
-      png(file.path(outDir, paste(prefix, typeList.valid[[i]], ".png", sep="")),width=1000,height=750)
-      if(length(colnames(df))==1){
-        plot(df, main =paste("Variable:", typeList.valid[[i]]),xlab="Years", ylab="NULL")
-      }else{
-        plot(df, main =paste("Variable:", typeList.valid[[i]]),xlab="Years")
+    # check how many coordinates
+    coordinates <- unique(paste(df$Lat, df$Lon, sep = "_"))
+    if(length(coordinates) > 1 ){
+      # if only one grid, simplify the list
+      #      if (length(listData) == 1){
+      # listData <- listData[[1]]
+      # Adding Data to listData
+      # looping over data types, reading files, processing data and adding it to the Data Class
+      # list append data, probably will have to use the name() function to give it the right name
+      # in the end, make the list of class LPJData
+      # Add data to LPJout Data class
+      coordinates <- lapply(coordinates, function(x){as.numeric(unlist(strsplit(x, "_")))})
+      #keep <- rep(TRUE, length(coord))
+      #sub_data <- coord[coord>=min(lon.extent) & Lon<=max(lon.extent) & Lat <=max(lat.extent) & Lat>=min(lat.extent))
+      for (k in 1:length(coordinates)){
+        df_subset <- df[df$Lat==coordinates[[k]][1] & df$Lon==coordinates[[k]][2],]
+        if(zoo::is.zoo(df_subset) == FALSE){
+          df_subset <- convertTS(df_subset)
+        }
+        if (save.plots){
+          png(file.path(outDir, paste(prefix, typeList.valid[[i]], ".png", sep="")),width=1000,height=750)
+          if(length(colnames(df_subset))==1){
+            plot(df_subset, main =paste("Grid", coordinates[[k]][1], coordinates[[k]][2],
+                                        "Variable:", typeList.valid[[i]]),xlab="Years", ylab="NULL")
+          }else{
+            plot(df_subset, main =paste("Grid", coordinates[[k]][1], coordinates[[k]][2],
+                                        "Variable:", typeList.valid[[i]]),xlab="Years")
+          }
+          dev.off()
+        }else{
+          if(length(colnames(df_subset))==1){
+            plot(df_subset,  main =paste("Grid", coordinates[[k]][1], coordinates[[k]][2],
+                                         "Variable:", typeList.valid[[i]]),xlab="Years", ylab="NULL")
+          }else{
+            plot(df_subset,  main =paste("Grid", coordinates[[k]][1], coordinates[[k]][2],
+                                  "Variable:", typeList.valid[[i]]),xlab="Years")
+          }
+        }
       }
-      dev.off()
     }else{
-      if(length(colnames(df))==1){
-        plot(df,  main =paste("Variable:", typeList.valid[[i]]),xlab="Years", ylab="NULL")
+    # something like is zoo
+      if(zoo::is.zoo(df) == FALSE){
+        df <- convertTS(df)
+      }
+      if (save.plots){
+        png(file.path(outDir, paste(prefix, typeList.valid[[i]], ".png", sep="")),width=1000,height=750)
+        if(length(colnames(df))==1){
+          plot(df, main =paste("Variable:", typeList.valid[[i]]),xlab="Years", ylab="NULL")
+        }else{
+          plot(df, main =paste("Variable:", typeList.valid[[i]]),xlab="Years")
+        }
+        dev.off()
       }else{
-        plot(df,  main =paste("Variable:", typeList.valid[[i]]),xlab="Years")
+        if(length(colnames(df))==1){
+          plot(df,  main =paste("Variable:", typeList.valid[[i]]),xlab="Years", ylab="NULL")
+        }else{
+          plot(df,  main =paste("Variable:", typeList.valid[[i]]),xlab="Years")
+        }
       }
     }
   }

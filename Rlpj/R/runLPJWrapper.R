@@ -21,33 +21,33 @@ runLPJWrapper <- function(runObject){
   #----------------------------------------------------------------------------#
   # checking conditions
   if (is.null(runObject[["runDir"]]) || !file.exists(runObject$runDir)){
-    stop("Please provide a valid run directory.")
+    stop("Please provide a valid run directory")
   }
   if (is.null(runObject[["outDir"]]) || !file.exists(runObject$outDir)){
-    stop("Please provide a valid output directory.")
+    stop("Please provide a valid output directory")
   }
   if (is.null(runObject[["template1"]])){
-    stop("Please provide a valid  template1 name.")
+    stop("Please provide a valid  template1 name")
   }
   if (is.null(runObject[["template2"]])){
-    stop("Please provide a valid  template2 name.")
+    stop("Please provide a valid  template2 name")
   }
   #if (is.null(runObject[["parameterList"]])){ No because it could run with default values
   #  stop("Please provide a valid parameter list.")
   #}
   if (is.null(runObject[["plot.data"]])){
-    warning("The plot.data boolean has not been provided. It will be set to FALSE.")
+    warning("The plot.data boolean has not been provided. It will be set to FALSE")
     runObject$plot.data <- FALSE
     runObject$save.plots <- FALSE
   }
   if ( is.null(runObject[["save.plots"]])){
-    warning("The save.plots boolean has not been provided. It will be set to FALSE.")
+    warning("The save.plots boolean has not been provided. It will be set to FALSE")
     runObject$save.plots <- FALSE
   }
   if (is.null(runObject[["typeList"]])){
     runObject$typeList <- typelist.default
     warning("The output type list has not been provided")
-    warning("Setting type list to default values.")
+    warning("Setting type list to default values")
   }
   #----------------------------------------------------------------------------#
   # WRAP THE FUNCTIONS
@@ -68,12 +68,10 @@ runLPJWrapper <- function(runObject){
   # calling the model
   callLPJ(runObject$mainDir, runObject$runDir,runObject$template2, runObject$mode)
   # getting data
-  LPJout <- getData(runObject$typeList, runObject$outDir, runObject,
+  LPJout <- getData(runObject$outDir, runObject$typeList, runObject,
                      runObject$processing)
 
-  #if (is.na(LPJout@dataTypes)){
-  #  stop("There are not model outputs. Please check the guess.log files")
-  #}
+
   #----------------------------------------------------------------------------#
   # CLEAN UP RUNDIR
   #----------------------------------------------------------------------------#
@@ -93,7 +91,7 @@ runLPJWrapper <- function(runObject){
   save(runObject, file = file.path(runObject$runInfoDir,
                                    paste("runInfo", runObject$runID,".Rdata", sep = "")))
   if (runObject[["plot.data"]] == TRUE){
-    plotLPJData(data = LPJout, typeList = runObject$typeList,
+    plotLPJData(x = LPJout, typeList = runObject$typeList,
              outDir = runObject$outDir, save.plots = runObject$save.plots,
              prefix = paste("run",runObject$runID, "_", sep=""))
   }
